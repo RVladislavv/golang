@@ -8,7 +8,7 @@ import (
 const USDinEUR = 0.9
 const USDinRUB = 91.5
 
-var convertMap = map[string]map[string]float64 {
+var convertMap = &map[string]map[string]float64 {
 	"USD": {
 		"EUR": USDinEUR,
 		"RUB": USDinRUB,
@@ -25,7 +25,7 @@ var convertMap = map[string]map[string]float64 {
 
 func main() {
 	base, sum, target := getUserData()
-	res := convertCurrency(sum, base, target)
+	res := convertCurrency(sum, base, target, convertMap)
 	fmt.Printf("%.2f %s в %s: %.2f ", sum, base, target, res)
 }
 
@@ -70,7 +70,7 @@ func getUserData() (string, float64, string) {
 	return baseCurrency, sumValue, targetCurrenct
 }
 
-func convertCurrency(sum float64, base string, target string) float64 {
-	value := convertMap[base][target]
+func convertCurrency(sum float64, base string, target string, convMap *map[string]map[string]float64) float64 {
+	value := (*convMap)[base][target]
 	return value * sum
 }
