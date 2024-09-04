@@ -1,14 +1,32 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const USDinEUR = 0.9
 const USDinRUB = 91.5
 
+var convertMap = &map[string]map[string]float64 {
+	"USD": {
+		"EUR": USDinEUR,
+		"RUB": USDinRUB,
+	},
+	"EUR": {
+		"USD": 1 / USDinEUR,
+		"RUB": USDinRUB / USDinEUR,
+	},
+	"RUB": {
+		"USD": 1 / USDinRUB,
+		"EUR": USDinEUR / USDinRUB,
+	},
+}
+
 func main() {
 	base, sum, target := getUserData()
-	res := convertCurrency(sum, base, target)
-	fmt.Printf("%f %s в %s: %f ", sum, base, target, res)
+	res := convertCurrency(sum, base, target, convertMap)
+	fmt.Printf("%.2f %s в %s: %.2f ", sum, base, target, res)
 }
 
 func getUserData() (string, float64, string) {
@@ -18,6 +36,7 @@ func getUserData() (string, float64, string) {
 	for {
 		fmt.Println("Введите исходную валюту: RUB | USD | EUR")
 		fmt.Scan(&baseCurrency)
+		baseCurrency = strings.ToUpper(baseCurrency)
 		if baseCurrency == "RUB" || baseCurrency == "USD" || baseCurrency == "EUR" {
 			break
 		} else {
@@ -36,7 +55,8 @@ func getUserData() (string, float64, string) {
 	for {
 		fmt.Println("Введите целевую валюту(отличную исходной): RUB | USD | EUR")
 		fmt.Scan(&targetCurrenct)
-		
+		targetCurrenct = strings.ToUpper(targetCurrenct)
+
 		if baseCurrency == targetCurrenct {
 			fmt.Println("Целевая валюта идентична исходной, выберите другую")
 			continue
@@ -50,31 +70,7 @@ func getUserData() (string, float64, string) {
 	return baseCurrency, sumValue, targetCurrenct
 }
 
-func convertCurrency(sum float64, base string, target string) float64 {
-	var res float64
-	if base == "USD" {
-		if target == "EUR" {
-			res = sum * USDinEUR
-		}
-		if target == "RUB" {
-			res = sum * USDinRUB
-		}
-	}
-	if base == "EUR" {
-		if target == "USD" {
-			res = sum / USDinEUR
-		}
-		if target == "RUB" {
-			res = sum / USDinEUR * USDinRUB
-		}
-	}
-	if base == "RUB" {
-		if target == "USD" {
-			res = sum / USDinRUB
-		}
-		if target == "EUR" {
-			res = sum / USDinRUB * USDinEUR
-		}
-	}
-	return res
+func convertCurrency(sum float64, base string, target string, convMap *map[string]map[string]float64) float64 {
+	value := (*convMap)[base][target]
+	return value * sum
 }
